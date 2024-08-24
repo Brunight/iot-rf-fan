@@ -8,10 +8,12 @@
 #include "WebServer/WebServer.h"
 #include "DataFilesManger/DataFilesManager.h"
 #include "OTAManager/OTAManager.h"
+#include "services/FanService/FanService.h"
 
 WebServer webServer;
 DataFilesManager dataFilesManager("/data-files");
 OTAManager otaManager;
+FanService fanService(&webServer);
 
 // built-in LED
 const int debugLed = D4;
@@ -103,9 +105,12 @@ void setup() {
   webServer.on("/api/led/toggle", HTTP_GET, REQUIRE_AUTH, handleToggleLedState);
   webServer.on("/api/led", HTTP_GET, handleGetLedState);
   webServer.on("/api/restart", HTTP_POST, REQUIRE_AUTH, handleRestart);
+
+  fanService.begin();
 }
 
 void loop() {
   otaManager.loop();
   webServer.handleClient();
+  fanService.loop();
 }
