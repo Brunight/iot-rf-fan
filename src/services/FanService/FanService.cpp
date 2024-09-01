@@ -3,7 +3,6 @@
 #include "RfManager/RfManager.h"
 #include <ArduinoHA.h>
 #include <ESP8266WiFi.h>
-#include <ESP8266HTTPClient.h>
 #include <ArduinoJson.h>
 #include "secrets.h"
 
@@ -56,35 +55,35 @@ void FanService::begin() {
     mqtt.begin(SECRET_MQTT_BROKER_IP);
   #endif
   
-  _webserver->on("/api/status", HTTP_GET, REQUIRE_AUTH, [this]() {
-    _webserver->send(200, "application/json", "{\"light\": "
+  _webserver->on("/api/status", HTTP_GET, REQUIRE_AUTH, [this](AsyncWebServerRequest* request) {
+    request->send(200, "application/json", "{\"light\": "
       + String(lightState) + ", \"fan\": " + String(fanState) + ", \"speed\": " + String(fanSpeed) + "}");
   });
 
-  _webserver->on("/api/light/toggle", HTTP_GET, REQUIRE_AUTH, [this]() {
+  _webserver->on("/api/light/toggle", HTTP_GET, REQUIRE_AUTH, [this](AsyncWebServerRequest* request) {
     onLightStateCommand(!lightState, &light);
-    _webserver->send(200, "application/json", "{\"value\": " + String(lightState) + "}");
+    request->send(200, "application/json", "{\"value\": " + String(lightState) + "}");
   });
-  _webserver->on("/api/light/toggle", HTTP_POST, REQUIRE_AUTH, [this]() {
+  _webserver->on("/api/light/toggle", HTTP_POST, REQUIRE_AUTH, [this](AsyncWebServerRequest* request) {
     onLightStateCommand(!lightState, &light);
-    _webserver->send(200, "application/json", "{\"value\": " + String(lightState) + "}");
+    request->send(200, "application/json", "{\"value\": " + String(lightState) + "}");
   });
-  _webserver->on("/api/fan/toggle", HTTP_GET, REQUIRE_AUTH, [this]() {
+  _webserver->on("/api/fan/toggle", HTTP_GET, REQUIRE_AUTH, [this](AsyncWebServerRequest* request) {
     onFanStateCommand(!fanState, &fan);
-    _webserver->send(200, "application/json", "{\"value\": " + String(fanState) + "}");
+    request->send(200, "application/json", "{\"value\": " + String(fanState) + "}");
   });
-  _webserver->on("/api/fan/toggle", HTTP_POST, REQUIRE_AUTH, [this]() {
+  _webserver->on("/api/fan/toggle", HTTP_POST, REQUIRE_AUTH, [this](AsyncWebServerRequest* request) {
     onFanStateCommand(!fanState, &fan);
-    _webserver->send(200, "application/json", "{\"value\": " + String(fanState) + "}");
+    request->send(200, "application/json", "{\"value\": " + String(fanState) + "}");
   });
-  _webserver->on("/api/fan/speed/toggle", HTTP_POST, REQUIRE_AUTH, [this]() {
+  _webserver->on("/api/fan/speed/toggle", HTTP_POST, REQUIRE_AUTH, [this](AsyncWebServerRequest* request) {
     unsigned int newSpeed = fanSpeed == 0 ? 2 : fanSpeed - 1;
     onFanSpeedCommand(newSpeed, &fan);
-    _webserver->send(200, "application/json", "{\"value\": " + String(newSpeed) + "}");
+    request->send(200, "application/json", "{\"value\": " + String(newSpeed) + "}");
   });
-  _webserver->on("/api/reset", HTTP_POST, REQUIRE_AUTH, [this]() {
+  _webserver->on("/api/reset", HTTP_POST, REQUIRE_AUTH, [this](AsyncWebServerRequest* request) {
     onResetCommand(&button);
-    _webserver->send(201);
+    request->send(201);
   });
 }
 
