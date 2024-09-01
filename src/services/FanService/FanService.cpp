@@ -2,7 +2,6 @@
 #include "services/FanService/FanService.h"
 #include "RfManager/RfManager.h"
 #include <ArduinoHA.h>
-#include <ESP8266WiFi.h>
 #include <ArduinoJson.h>
 #include "secrets.h"
 
