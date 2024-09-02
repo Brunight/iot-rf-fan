@@ -3,7 +3,7 @@ import { render } from 'preact'
 import { LocationProvider, Router, Route } from 'preact-iso'
 
 import { Header } from './components/Header.jsx'
-import { RemoteControl } from './pages/RemoteControl/index.js'
+import { FanControl } from './pages/FanControl/index.js'
 import { LoginPage } from './pages/Login/index.js'
 import { NotFound } from './pages/_404.jsx'
 import { OtherPage } from './pages/OtherPage/index.js'
@@ -22,8 +22,7 @@ export function App() {
 					<main class="flex flex-col items-center mb-auto">
 						<Router>
 							<Route path="/login" component={LoginPage} />
-							<Route path="/" component={RemoteControl} />
-							<Route path="/other-page" component={OtherPage} />
+							<Route path="/" component={FanControl} />
 							<Route default component={NotFound} />
 						</Router>
 					</main>

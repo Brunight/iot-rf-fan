@@ -20,7 +20,11 @@ export default defineConfig({
       "/api": {
         target: proxyTarget,
         changeOrigin: true,
-      }
+      },
+      "/ws": {
+        target: proxyTarget.replace("http", "ws"),
+        ws: true,
+      },
     }
   } : undefined
 });

@@ -37,6 +37,8 @@ void WebServer::begin() {
     return;
   }
 
+  server.addHandler(&ws);
+
   server.on("/api/ping", HTTP_GET, [this](AsyncWebServerRequest* request) {
     Serial.println("GET /api/ping");
     request->send(200, "text/plain", "pong");

@@ -1,6 +1,7 @@
 #include "WebServer/WebServer.h"
 #include "services/FanService/FanService.h"
 #include "RfManager/RfManager.h"
+#include "utils/boolToString.cpp"
 #include <ArduinoHA.h>
 #include <ArduinoJson.h>
 #include "secrets.h"
@@ -63,24 +64,24 @@ void FanService::begin() {
 
   _webserver->on("/api/light/toggle", HTTP_GET, REQUIRE_AUTH, [this](AsyncWebServerRequest* request) {
     onLightStateCommand(!lightState, &light);
-    request->send(200, "application/json", "{\"value\": " + String(lightState) + "}");
+    request->send(200, "application/json", "{\"value\": " + boolToString(lightState) + "}");
   });
   _webserver->on("/api/light/toggle", HTTP_POST, REQUIRE_AUTH, [this](AsyncWebServerRequest* request) {
     onLightStateCommand(!lightState, &light);
-    request->send(200, "application/json", "{\"value\": " + String(lightState) + "}");
+    request->send(200, "application/json", "{\"value\": " + boolToString(lightState) + "}");
   });
   _webserver->on("/api/fan/toggle", HTTP_GET, REQUIRE_AUTH, [this](AsyncWebServerRequest* request) {
     onFanStateCommand(!fanState, &fan);
-    request->send(200, "application/json", "{\"value\": " + String(fanState) + "}");
+    request->send(200, "application/json", "{\"value\": " + boolToString(fanState) + "}");
   });
   _webserver->on("/api/fan/toggle", HTTP_POST, REQUIRE_AUTH, [this](AsyncWebServerRequest* request) {
     onFanStateCommand(!fanState, &fan);
-    request->send(200, "application/json", "{\"value\": " + String(fanState) + "}");
+    request->send(200, "application/json", "{\"value\": " + boolToString(fanState) + "}");
   });
   _webserver->on("/api/fan/speed/toggle", HTTP_POST, REQUIRE_AUTH, [this](AsyncWebServerRequest* request) {
     unsigned int newSpeed = fanSpeed == 0 ? 2 : fanSpeed - 1;
     onFanSpeedCommand(newSpeed, &fan);
-    request->send(200, "application/json", "{\"value\": " + String(newSpeed) + "}");
+    request->send(200, "application/json", "{\"value\": " + boolToString(newSpeed) + "}");
   });
   _webserver->on("/api/reset", HTTP_POST, REQUIRE_AUTH, [this](AsyncWebServerRequest* request) {
     onResetCommand(&button);
@@ -98,9 +99,9 @@ void FanService::onLightStateCommand(bool state, HALight *sender) {
   }
 
   lightState = state;
-  rfManager.sendRfCode(3603628053); // FAN LIGHT ON/OFF
   sender->setState(state);
   broadcastStatus();
+  rfManager.sendRfCode(3603628053); // FAN LIGHT ON/OFF
 };
 
 void FanService::onFanStateCommand(bool state, HAFan *sender) {
@@ -109,9 +110,9 @@ void FanService::onFanStateCommand(bool state, HAFan *sender) {
   }
 
   fanState = state;
-  rfManager.sendRfCode(3603628069); // FAN ON/OFF
   sender->setState(state);
   broadcastStatus();
+  rfManager.sendRfCode(3603628069); // FAN ON/OFF
 };
 
 void FanService::onFanSpeedCommand(uint16_t speed, HAFan *sender) {
@@ -124,14 +125,14 @@ void FanService::onFanSpeedCommand(uint16_t speed, HAFan *sender) {
     return;
   }
 
+
+  sender->setSpeed(speed);
+  broadcastStatus();
   while (speed != fanSpeed) {
     rfManager.sendRfCode(3603628101); // FAN SPEED TOGGLE
     unsigned int newSpeed = fanSpeed == 0 ? 2 : fanSpeed - 1;
     fanSpeed = newSpeed;
   }
-
-  sender->setSpeed(speed);
-  broadcastStatus();
 }
 
 void FanService::onResetCommand(HAButton *sender) {
@@ -152,7 +153,7 @@ void FanService::loop() {
 }
 
 String FanService::getStatus() {
-  return "{\"light\":" + String(lightState) + ",\"fan\":" + String(fanState) + ",\"speed\":" + String(fanSpeed) + "}";
+  return "{\"light\":" + boolToString(lightState) + ",\"fan\":" + boolToString(fanState) + ",\"speed\":" + boolToString(fanSpeed) + "}";
 }
 
 void FanService::broadcastStatus() {
