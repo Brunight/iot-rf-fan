@@ -11,6 +11,7 @@ enum Auth { REQUIRE_AUTH };
 class WebServer {
 public:
   WebServer(int port = 80);
+  AsyncWebSocket ws;
   typedef std::function<void(AsyncWebServerRequest *request, User* user)> ArAuthenticatedRequestHandlerFunction;
   typedef std::function<void(AsyncWebServerRequest *request, String body)> ArRequestWithBodyHandlerFunction;
   typedef std::function<void(AsyncWebServerRequest *request, User* user, String body)> ArAuthenticatedRequestWithBodyHandlerFunction;

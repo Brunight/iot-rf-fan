@@ -18,7 +18,10 @@ HAButton button("reset_ventilador");
 
 RfManager rfManager(RF_TRANSMITTER_PIN, 6);
 
-FanService::FanService(WebServer* webserver) : _webserver(webserver) {
+WebServer* FanService::_webserver;
+
+FanService::FanService(WebServer* webserver) {
+  this->_webserver = webserver;
 }
 
 void FanService::begin() {
@@ -55,8 +58,7 @@ void FanService::begin() {
   #endif
   
   _webserver->on("/api/status", HTTP_GET, REQUIRE_AUTH, [this](AsyncWebServerRequest* request) {
-    request->send(200, "application/json", "{\"light\": "
-      + String(lightState) + ", \"fan\": " + String(fanState) + ", \"speed\": " + String(fanSpeed) + "}");
+    request->send(200, "application/json", getStatus());
   });
 
   _webserver->on("/api/light/toggle", HTTP_GET, REQUIRE_AUTH, [this](AsyncWebServerRequest* request) {
@@ -98,6 +100,7 @@ void FanService::onLightStateCommand(bool state, HALight *sender) {
   lightState = state;
   rfManager.sendRfCode(3603628053); // FAN LIGHT ON/OFF
   sender->setState(state);
+  broadcastStatus();
 };
 
 void FanService::onFanStateCommand(bool state, HAFan *sender) {
@@ -108,6 +111,7 @@ void FanService::onFanStateCommand(bool state, HAFan *sender) {
   fanState = state;
   rfManager.sendRfCode(3603628069); // FAN ON/OFF
   sender->setState(state);
+  broadcastStatus();
 };
 
 void FanService::onFanSpeedCommand(uint16_t speed, HAFan *sender) {
@@ -127,6 +131,7 @@ void FanService::onFanSpeedCommand(uint16_t speed, HAFan *sender) {
   }
 
   sender->setSpeed(speed);
+  broadcastStatus();
 }
 
 void FanService::onResetCommand(HAButton *sender) {
@@ -136,6 +141,7 @@ void FanService::onResetCommand(HAButton *sender) {
   fan.setState(false);
   fan.setSpeed((unsigned int)2);
   light.setState(true);
+  broadcastStatus();
 }
 
 void FanService::loop() {
@@ -143,4 +149,12 @@ void FanService::loop() {
   #ifdef SECRET_MQTT_BROKER_IP
     mqtt.loop();
   #endif
+}
+
+String FanService::getStatus() {
+  return "{\"light\":" + String(lightState) + ",\"fan\":" + String(fanState) + ",\"speed\":" + String(fanSpeed) + "}";
+}
+
+void FanService::broadcastStatus() {
+  _webserver->ws.textAll(getStatus());
 }

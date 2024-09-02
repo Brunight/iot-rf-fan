@@ -7,7 +7,8 @@
 #include "static_files.h"
 #include <pgmspace.h>
 
-WebServer::WebServer(int port) : server(port) {}
+WebServer::WebServer(int port) : ws("/ws"), server(port) {
+}
 
 const String NO_AUTH_JWT_SECRET = "NO_AUTH";
 const String NO_AUTH_JWT_PAYLOAD = "{\"username\":\"guest\",\"noAuth\":true}";
